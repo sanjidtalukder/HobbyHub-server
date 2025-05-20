@@ -1,21 +1,21 @@
 import express from 'express';
 import cors from 'cors';
-import { MongoClient, ServerApiVersion } from 'mongodb';
 import dotenv from 'dotenv';
+import { MongoClient, ServerApiVersion } from 'mongodb';
 
+// ✅ Load .env file
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Middleware
+// ✅ Middlewares
 app.use(cors());
 app.use(express.json());
 
-// p-6YfHGdH99bKSjOBt
-// n- hobbyhubDB
-// MongoDB Connection
+// ✅ Use URI from .env
 const uri = process.env.MONGODB_URI;
+
 const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
@@ -23,29 +23,29 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
-    const db = client.db('hobbyhubDB');
-    const groupCollection = db.collection('groups');
+    const db = client.db('mdsanjidt'); // database name from URI
+    const userCollection = db.collection('users');
 
-    // Example API
-    app.post('/create-group', async (req, res) => {
-      const group = req.body;
-      const result = await groupCollection.insertOne(group);
+    // ✅ POST route
+    app.post('/users', async (req, res) => {
+      const user = req.body;
+      console.log('Received:', user); // optional debug
+      const result = await userCollection.insertOne(user);
       res.send(result);
     });
 
-    app.get('/groups', async (req, res) => {
-      const result = await groupCollection.find().toArray();
-      res.send(result);
-    });
-
-    console.log('MongoDB Connected ');
+    console.log(' MongoDB connected successfully');
   } catch (err) {
-    console.error('Connection Error:', err);
+    console.error(' MongoDB connection error:', err);
   }
 }
 
 run();
 
+app.get('/', (req, res) => {
+  res.send('HobbyHub Server is running');
+});
+
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  console.log(`🚀 Server is running on http://localhost:${port}`);
 });
