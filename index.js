@@ -9,24 +9,24 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Middlewares
+// Middleware
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static('uploads')); // serve uploaded images
+app.use('/uploads', express.static('uploads')); // Serve static files from uploads
 
-// MongoDB Setup
+// MongoDB setup
 const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
-// Multer setup for file uploads
+// Multer setup for file upload
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads/'),
   filename: (req, file, cb) => {
     const uniqueName = `${Date.now()}-${file.originalname}`;
     cb(null, uniqueName);
-  }
+  },
 });
 const upload = multer({ storage });
 
@@ -37,14 +37,19 @@ async function run() {
     const usersCollection = db.collection('users');
     const groupsCollection = db.collection('groups');
 
-    // Users API
+    // Root
+    app.get('/', (req, res) => {
+      res.send('HobbyHub Server is running...');
+    });
+
+    // Users
     app.post('/users', async (req, res) => {
       const user = req.body;
       const result = await usersCollection.insertOne(user);
       res.send(result);
     });
 
-    // Create Group
+    // Groups
     app.post('/api/groups', async (req, res) => {
       const group = req.body;
       group.creatorEmail = group.creatorEmail?.toLowerCase();
@@ -52,10 +57,9 @@ async function run() {
       res.send(result);
     });
 
-    // Get All Groups
     app.get('/api/groups', async (req, res) => {
-      let query = {};
       const creatorEmail = req.query.creatorEmail;
+      let query = {};
       if (creatorEmail) {
         query.creatorEmail = creatorEmail.toLowerCase();
       }
@@ -63,51 +67,75 @@ async function run() {
       res.send(result);
     });
 
-    // Get Single Group
     app.get('/api/groups/:id', async (req, res) => {
       const id = req.params.id;
       const group = await groupsCollection.findOne({ _id: new ObjectId(id) });
       res.send(group);
     });
 
-    // ✅ Update Group with optional file upload
-    app.put('/api/groups/:id', upload.single('image'), async (req, res) => {
+    //  Update group WITHOUT image
+    app.put('/api/groups/:id', async (req, res) => {
       const id = req.params.id;
+      const { name, description } = req.body;
+
+      try {
+        const result = await groupsCollection.updateOne(
+          { _id: new ObjectId(id) },
+          {
+            $set: {
+              name,
+              description,
+            },
+          }
+        );
+        res.send(result);
+      } catch (err) {
+        console.error(err);
+        res.status(500).send({ error: 'Group update failed' });
+      }
+    });
+
+    //  Optional: Update WITH image if FormData is used
+    app.put('/api/groups/:id/with-image', upload.single('image'), async (req, res) => {
+      const id = req.params.id;
+      const { name, description } = req.body;
+
       const updatedFields = {
-        name: req.body.name,
-        description: req.body.description,
+        name,
+        description,
       };
 
       if (req.file) {
         updatedFields.imageUrl = `/uploads/${req.file.filename}`;
       }
 
-      const result = await groupsCollection.updateOne(
-        { _id: new ObjectId(id) },
-        { $set: updatedFields }
-      );
-      res.send(result);
+      try {
+        const result = await groupsCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: updatedFields }
+        );
+        res.send(result);
+      } catch (err) {
+        console.error(err);
+        res.status(500).send({ error: 'Image update failed' });
+      }
     });
 
-    // Delete Group
+    // Delete group
     app.delete('/api/groups/:id', async (req, res) => {
       const id = req.params.id;
       const result = await groupsCollection.deleteOne({ _id: new ObjectId(id) });
       res.send(result);
     });
 
-    console.log('✅ MongoDB connected successfully');
+    console.log(' MongoDB connected successfully');
   } catch (err) {
-    console.error('❌ MongoDB connection error:', err);
+    console.error(' MongoDB connection failed:', err);
   }
 }
 
 run();
 
-app.get('/', (req, res) => {
-  res.send('HobbyHub Server is running...');
-});
-
 app.listen(port, () => {
-  console.log(`🚀 Server is running on http://localhost:${port}`);
+  console.log(` Server is running on http://localhost:${port}`);
 });
