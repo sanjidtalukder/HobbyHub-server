@@ -47,7 +47,10 @@ async function run() {
 
     // READ all groups (for AllGroups.jsx)
     app.get('/api/groups', async (req, res) => {
-      const creatorEmail = req.query.creatorEmail;
+     const creatorEmail = req.query.creatorEmail;
+if (creatorEmail) {
+  query.creatorEmail = creatorEmail;
+}
 
       let query = {};
       if (creatorEmail) {
