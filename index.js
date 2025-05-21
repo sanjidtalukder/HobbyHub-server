@@ -3,9 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { MongoClient, ServerApiVersion, ObjectId } from 'mongodb';
 
-// Load environment variables
 dotenv.config();
-
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -25,50 +23,40 @@ async function run() {
     const usersCollection = db.collection('users');
     const groupsCollection = db.collection('groups');
 
-    // -----------------------------
-    // Users (Optional)
-    // -----------------------------
+    // Users API (optional)
     app.post('/users', async (req, res) => {
       const user = req.body;
       const result = await usersCollection.insertOne(user);
       res.send(result);
     });
 
-    // -----------------------------
-    // Groups API
-    // -----------------------------
-
-    // CREATE group
+    // Create Group
     app.post('/api/groups', async (req, res) => {
       const group = req.body;
+      group.creatorEmail = group.creatorEmail?.toLowerCase(); // Ensure lowercase
       const result = await groupsCollection.insertOne(group);
       res.send(result);
     });
 
-    // READ all groups (for AllGroups.jsx)
+    // Get All Groups (optionally filtered by creatorEmail)
     app.get('/api/groups', async (req, res) => {
-     const creatorEmail = req.query.creatorEmail;
-if (creatorEmail) {
-  query.creatorEmail = creatorEmail;
-}
-
       let query = {};
+      const creatorEmail = req.query.creatorEmail;
       if (creatorEmail) {
-        query.creatorEmail = creatorEmail;
+        query.creatorEmail = creatorEmail.toLowerCase(); // Ensure lowercase match
       }
-
       const result = await groupsCollection.find(query).toArray();
       res.send(result);
     });
 
-    // READ single group by ID (for UpdateGroup.jsx)
+    // Get Single Group by ID
     app.get('/api/groups/:id', async (req, res) => {
       const id = req.params.id;
       const group = await groupsCollection.findOne({ _id: new ObjectId(id) });
       res.send(group);
     });
 
-    // UPDATE group
+    // Update Group
     app.put('/api/groups/:id', async (req, res) => {
       const id = req.params.id;
       const updatedFields = req.body;
@@ -79,7 +67,7 @@ if (creatorEmail) {
       res.send(result);
     });
 
-    // DELETE group
+    // Delete Group
     app.delete('/api/groups/:id', async (req, res) => {
       const id = req.params.id;
       const result = await groupsCollection.deleteOne({ _id: new ObjectId(id) });
