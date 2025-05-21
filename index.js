@@ -1,21 +1,19 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { MongoClient, ServerApiVersion } from 'mongodb';
+import { MongoClient, ServerApiVersion, ObjectId } from 'mongodb';
 
-// ✅ Load .env file
+// Load environment variables
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;
 
-// ✅ Middlewares
+// Middlewares
 app.use(cors());
 app.use(express.json());
 
-// ✅ Use URI from .env
 const uri = process.env.MONGODB_URI;
-
 const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
@@ -23,27 +21,78 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
-    const db = client.db('mdsanjidt'); // database name from URI
-    const userCollection = db.collection('users');
+    const db = client.db('mdsanjidt');
+    const usersCollection = db.collection('users');
+    const groupsCollection = db.collection('groups');
 
-    // ✅ POST route
+    // -----------------------------
+    // Users (Optional)
+    // -----------------------------
     app.post('/users', async (req, res) => {
       const user = req.body;
-      console.log('Received:', user); // optional debug
-      const result = await userCollection.insertOne(user);
+      const result = await usersCollection.insertOne(user);
       res.send(result);
     });
 
-    console.log(' MongoDB connected successfully');
+    // -----------------------------
+    // Groups API
+    // -----------------------------
+
+    // CREATE group
+    app.post('/api/groups', async (req, res) => {
+      const group = req.body;
+      const result = await groupsCollection.insertOne(group);
+      res.send(result);
+    });
+
+    // READ all groups (for AllGroups.jsx)
+    app.get('/api/groups', async (req, res) => {
+      const creatorEmail = req.query.creatorEmail;
+
+      let query = {};
+      if (creatorEmail) {
+        query.creatorEmail = creatorEmail;
+      }
+
+      const result = await groupsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // READ single group by ID (for UpdateGroup.jsx)
+    app.get('/api/groups/:id', async (req, res) => {
+      const id = req.params.id;
+      const group = await groupsCollection.findOne({ _id: new ObjectId(id) });
+      res.send(group);
+    });
+
+    // UPDATE group
+    app.put('/api/groups/:id', async (req, res) => {
+      const id = req.params.id;
+      const updatedFields = req.body;
+      const result = await groupsCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: updatedFields }
+      );
+      res.send(result);
+    });
+
+    // DELETE group
+    app.delete('/api/groups/:id', async (req, res) => {
+      const id = req.params.id;
+      const result = await groupsCollection.deleteOne({ _id: new ObjectId(id) });
+      res.send(result);
+    });
+
+    console.log('✅ MongoDB connected successfully');
   } catch (err) {
-    console.error(' MongoDB connection error:', err);
+    console.error('❌ MongoDB connection error:', err);
   }
 }
 
 run();
 
 app.get('/', (req, res) => {
-  res.send('HobbyHub Server is running');
+  res.send('HobbyHub Server is running...');
 });
 
 app.listen(port, () => {
