@@ -148,6 +148,44 @@ async function run() {
       res.send(result);
     });
 
+    // newrequest end point
+app.post('/api/groups/:id/join-request', async (req, res) => {
+  const groupId = req.params.id;
+  const { name, email, photo } = req.body;
+
+  if (!email) {
+    return res.status(400).send({ error: 'Email is required' });
+  }
+
+  try {
+    const group = await groupsCollection.findOne({ _id: new ObjectId(groupId) });
+    if (!group) {
+      return res.status(404).send({ error: 'Group not found' });
+    }
+
+    //  joinRequests 
+    const alreadyRequested = group.joinRequests?.some(u => u.email === email);
+    const alreadyJoined = group.joinedUsers?.some(u => u.email === email);
+
+    if (alreadyRequested || alreadyJoined) {
+      return res.status(400).send({ error: 'You have already requested or joined this group.' });
+    }
+
+    //new request
+    const updatedJoinRequests = [...(group.joinRequests || []), { name, email, photo }];
+    await groupsCollection.updateOne(
+      { _id: new ObjectId(groupId) },
+      { $set: { joinRequests: updatedJoinRequests } }
+    );
+
+    res.send({ message: 'Join request sent successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: 'Failed to send join request' });
+  }
+});
+
+
   } catch (err) {
     console.error(' Error:', err);
   }
