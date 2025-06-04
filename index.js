@@ -16,6 +16,12 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
+// Request Logger (optional but useful)
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  next();
+});
+
 // Multer setup for image uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads/'),
@@ -28,18 +34,21 @@ const upload = multer({ storage });
 
 // MongoDB
 const uri = process.env.MONGODB_URI;
+if (!uri) {
+  console.error(" MongoDB URI missing in .env");
+  process.exit(1);
+}
 const client = new MongoClient(uri, { serverApi: ServerApiVersion.v1 });
 
 async function run() {
   try {
     await client.connect();
-    console.log(' MongoDB connected');
+    console.log('MongoDB connected');
 
     const db = client.db('mdsanjidt');
     const usersCollection = db.collection('users');
     const groupsCollection = db.collection('groups');
 
-    // Create Index for performance
     await groupsCollection.createIndex({ creatorEmail: 1 });
 
     // Root route
@@ -47,43 +56,49 @@ async function run() {
       res.send(' HobbyHub Server is running...');
     });
 
-    // Add user
+    // ➤ Add user
     app.post('/users', async (req, res) => {
       const user = req.body;
       const result = await usersCollection.insertOne(user);
       res.send(result);
     });
 
-    // Add group
+    // ➤ Add group (with optional imageUrl)
     app.post('/api/groups', async (req, res) => {
-  try {
-    const group = req.body;
-    if (group.creatorEmail) {
-      group.creatorEmail = group.creatorEmail.toLowerCase();
-    }
-    // Ensure the image field is consistent with frontend key "imageUrl"
-    if (group.image) {
-      group.imageUrl = group.image;
-      delete group.image;
-    }
-    const result = await groupsCollection.insertOne(group);
-    res.send(result);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send({ error: "Failed to create group" });
-  }
-});
+      try {
+        const group = req.body;
+        const { name, description, creatorEmail, category, startDate, image } = group;
 
+        if (!name || !description || !creatorEmail) {
+          return res.status(400).send({ error: "Missing required fields" });
+        }
 
-    // Get groups with all necessary fields
+        group.creatorEmail = creatorEmail.toLowerCase();
+        group.createdAt = new Date();
+
+        // Use imageUrl if available
+        if (image) {
+          group.imageUrl = image;
+          delete group.image;
+        }
+
+        const result = await groupsCollection.insertOne(group);
+        res.send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ error: "Failed to create group" });
+      }
+    });
+
+    // ➤ Get groups
     app.get('/api/groups', async (req, res) => {
-      const { creatorEmail, page = 0, size = 100000 } = req.query;
+      const { creatorEmail, page = 0, size = 100 } = req.query;
       const query = creatorEmail ? { creatorEmail: creatorEmail.toLowerCase() } : {};
 
       const groups = await groupsCollection
         .find(query)
-        .project({ 
-          name: 1, 
+        .project({
+          name: 1,
           imageUrl: 1,
           description: 1,
           startDate: 1,
@@ -97,26 +112,26 @@ async function run() {
       res.send(groups);
     });
 
-    // Get single group by id
+    // ➤ Get single group
     app.get('/api/groups/:id', async (req, res) => {
       const id = req.params.id;
       const group = await groupsCollection.findOne({ _id: new ObjectId(id) });
       res.send(group);
     });
 
-    // Update group without image
+    // ➤ Update group (without image)
     app.put('/api/groups/:id', async (req, res) => {
       const id = req.params.id;
       const { name, description, category, startDate } = req.body;
-      const updatedFields = { name, description, category, startDate };
+
       const result = await groupsCollection.updateOne(
         { _id: new ObjectId(id) },
-        { $set: updatedFields }
+        { $set: { name, description, category, startDate } }
       );
       res.send(result);
     });
 
-    // Update group with image (compressed)
+    // ➤ Update group with image
     app.put('/api/groups/:id/with-image', upload.single('image'), async (req, res) => {
       const id = req.params.id;
       const { name, description, category, startDate } = req.body;
@@ -128,9 +143,8 @@ async function run() {
           .resize(800)
           .jpeg({ quality: 70 })
           .toFile(compressedPath);
-        fs.unlinkSync(req.file.path); // Delete original uploaded file
+        fs.unlinkSync(req.file.path); // Remove original
 
-        // Use absolute URL for imageUrl
         updatedFields.imageUrl = `${req.protocol}://${req.get('host')}/${compressedPath}`;
       }
 
@@ -141,53 +155,50 @@ async function run() {
       res.send(result);
     });
 
-    // Delete group
+    // ➤ Delete group
     app.delete('/api/groups/:id', async (req, res) => {
       const id = req.params.id;
       const result = await groupsCollection.deleteOne({ _id: new ObjectId(id) });
       res.send(result);
     });
 
-    // newrequest end point
-app.post('/api/groups/:id/join-request', async (req, res) => {
-  const groupId = req.params.id;
-  const { name, email, photo } = req.body;
+    // ➤ Send join request
+    app.post('/api/groups/:id/join-request', async (req, res) => {
+      const groupId = req.params.id;
+      const { name, email, photo } = req.body;
 
-  if (!email) {
-    return res.status(400).send({ error: 'Email is required' });
-  }
+      if (!email) {
+        return res.status(400).send({ error: 'Email is required' });
+      }
 
-  try {
-    const group = await groupsCollection.findOne({ _id: new ObjectId(groupId) });
-    if (!group) {
-      return res.status(404).send({ error: 'Group not found' });
-    }
+      try {
+        const group = await groupsCollection.findOne({ _id: new ObjectId(groupId) });
+        if (!group) {
+          return res.status(404).send({ error: 'Group not found' });
+        }
 
-    //  joinRequests 
-    const alreadyRequested = group.joinRequests?.some(u => u.email === email);
-    const alreadyJoined = group.joinedUsers?.some(u => u.email === email);
+        const alreadyRequested = group.joinRequests?.some(u => u.email === email);
+        const alreadyJoined = group.joinedUsers?.some(u => u.email === email);
 
-    if (alreadyRequested || alreadyJoined) {
-      return res.status(400).send({ error: 'You have already requested or joined this group.' });
-    }
+        if (alreadyRequested || alreadyJoined) {
+          return res.status(400).send({ error: 'Already requested or joined' });
+        }
 
-    //new request
-    const updatedJoinRequests = [...(group.joinRequests || []), { name, email, photo }];
-    await groupsCollection.updateOne(
-      { _id: new ObjectId(groupId) },
-      { $set: { joinRequests: updatedJoinRequests } }
-    );
+        const updatedJoinRequests = [...(group.joinRequests || []), { name, email, photo }];
+        await groupsCollection.updateOne(
+          { _id: new ObjectId(groupId) },
+          { $set: { joinRequests: updatedJoinRequests } }
+        );
 
-    res.send({ message: 'Join request sent successfully' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send({ error: 'Failed to send join request' });
-  }
-});
-
+        res.send({ message: 'Join request sent successfully' });
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ error: 'Failed to send join request' });
+      }
+    });
 
   } catch (err) {
-    console.error(' Error:', err);
+    console.error(' Error in run():', err);
   }
 }
 
