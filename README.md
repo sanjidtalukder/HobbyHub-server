@@ -1,86 +1,113 @@
-# 🎯 HobbyHub Server
+🎯 HobbyHub Server
+This is the Backend API Server for the HobbyHub project — a platform where users can create, join, and manage different hobby-based groups.
 
-This is the **Backend API Server** for the [HobbyHub](https://github.com/your-client-repo) project — a platform that allows users to create, join, and manage hobby groups.
+Tech Stack:
+Node.js • Express • MongoDB • Multer • Sharp • dotenv
 
-Powered by:  
-**Node.js | Express | MongoDB | Multer | Sharp | dotenv**
-
----
-
-## 📁 Project Structure
-
-📦 HobbyHub Server
-├── uploads/ # Uploaded images directory
-├── .env # Environment variables
-├── server.js # Main entry point
-├── package.json
-
-markdown
+📁 Project Structure
+bash
 Copy
 Edit
+📦 HobbyHub Server
+├── uploads/            # Stores uploaded images
+├── .env                # Environment variables
+├── server.js           # Main backend entry point
+├── package.json        # Project metadata & dependencies
+⚙️ Key Features
+🔐 User Management
+➕ Add new users to the database
 
----
+👥 Group Management
+➕ Create a group (with or without image)
 
-## ⚙️ Features
+📥 Upload and compress group image
 
-- 🔐 **User Management**  
-  - Add new users to the database
+📋 Fetch all groups or filter by creator’s email
 
-- 👥 **Group Management**
-  - Create group (with optional image upload)
-  - Fetch all groups or by creator's email
-  - View a single group by ID
-  - Update group (with or without new image)
-  - Delete group
+🔍 View a single group by ID
 
-- 📷 **Image Upload & Compression**
-  - Upload and compress images using `Multer` and `Sharp`
+✏️ Update group (with or without image)
 
-- 🙋 **Join Requests**
-  - Send join requests to any group
-  - Prevent duplicate requests or rejoining
+❌ Delete a group
 
----
+📷 Image Handling
+Image uploads handled via Multer
 
+Image compression via Sharp (800px width, 70% quality)
+
+Original images are auto-deleted after compression
+
+🙋 Group Join Requests
+➕ Send join requests to a group
+
+🚫 Prevent duplicate requests or rejoining the same group
+
+📡 API Endpoints
 👥 Groups
-➕ POST /api/groups
-Create a group with optional image field
-Body:
+➕ Create Group
+bash
+Copy
+Edit
+POST /api/groups
+Body (JSON):
 
+json
+Copy
+Edit
+{
+  "name": "Photography Club",
+  "description": "For photo lovers",
+  "creatorEmail": "john@example.com",
+  "category": "Photography",
+  "startDate": "2025-06-10",
+  "image": "https://..."  // Optional
+}
+🖼️ Update Group With Image
+ruby
+Copy
+Edit
+PUT /api/groups/:id/with-image
+Form Data (multipart/form-data):
 
-📷 POST /api/groups/:id/with-image
-Update a group with a new image
-Form Data:
+image: File (required)
 
-image (File)
+name, description, category, startDate: Text fields
 
-name, description, category, startDate (Text)
+🔍 Get All Groups
+sql
+Copy
+Edit
+GET /api/groups
+Query Parameters (optional):
 
+creatorEmail
 
+page (default: 0)
 
-🔍 GET /api/groups
-Fetch all groups or filter by creatorEmail
-Query Parameters:
+size (default: 100)
 
-creatorEmail (optional)
-
-page (default 0)
-
-size (default 100)
-
-🔍 GET /api/groups/:id
-Get a single group by ID
-
-✏️ PUT /api/groups/:id
-Update group info (without image)
-
-❌ DELETE /api/groups/:id
-Delete a group by ID
-
+🔍 Get Single Group
+bash
+Copy
+Edit
+GET /api/groups/:id
+✏️ Update Group Without Image
+bash
+Copy
+Edit
+PUT /api/groups/:id
+❌ Delete Group
+bash
+Copy
+Edit
+DELETE /api/groups/:id
 🙋 Join Requests
-➕ POST /api/groups/:id/join-request
-Send a join request to a group
-Body:
+➕ Send Join Request
+ruby
+Copy
+Edit
+POST /api/groups/:id/join-request
+Body (JSON):
 
 json
 Copy
@@ -90,23 +117,13 @@ Edit
   "email": "jane@example.com",
   "photo": "https://example.com/jane.jpg"
 }
-
-
-
-🖼 Image Handling
-Uploads are saved under /uploads
-
-Original image is compressed to 800px width at 70% quality using Sharp
-
-Original is deleted after compression
-
-🛠 Setup & Run
+🛠 Setup Instructions
 📦 Install Dependencies
 bash
 Copy
 Edit
 npm install
-📁 Create .env File
+🧪 Create .env File
 env
 Copy
 Edit
@@ -117,28 +134,24 @@ bash
 Copy
 Edit
 npm start
-Or in development mode:
-
-bash
-Copy
-Edit
+# or, for development:
 npx nodemon server.js
-🚀 Deployment
-For deployment on platforms like Render, Railway, or Vercel (Backend):
+🚀 Deployment Tips
+If you're deploying to platforms like Render, Railway, or Vercel:
 
-Make sure .env variables are configured
+✅ Ensure .env variables are configured properly
 
-Ensure uploads/ directory exists or handle cloud storage if needed
+✅ Make sure uploads/ folder exists on the server
+
+🔄 Alternatively, integrate cloud image storage (like Cloudinary or S3)
 
 🙌 Author
 👤 Md Sanjid Talukdar
-📧 Email: mdsanjid@gmsil.com
+📧 Email: mdsanjid@gmail.com
 📍 Based in Dhaka, Bangladesh
-🌐 GitHub: https://github.com/sanjidtalukder
+🌐 GitHub: sanjidtalukder
 
 📜 License
-This project is licensed under the Programming Hero.
-
----
-
+This project is developed as part of the Programming Hero initiative.
+Feel free to use, modify, or improve with proper attribution.
 
