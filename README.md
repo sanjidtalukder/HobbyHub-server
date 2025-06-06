@@ -48,7 +48,7 @@ Edit
 
 #### ➕ POST `/users`
 Create a new user  
-**Body:**
+
 ```json
 {
   "name": "John Doe",
@@ -58,6 +58,7 @@ Create a new user
 ➕ POST /api/groups
 Create a group with optional image field
 Body:
+
 
 📷 POST /api/groups/:id/with-image
 Update a group with a new image
