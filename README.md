@@ -1,59 +1,62 @@
-🎯 HobbyHub Server
-This is the Backend API Server for the HobbyHub project — a platform where users can create, join, and manage different hobby-based groups.
+# 🎯 HobbyHub Server
 
-Tech Stack:
+This is the **Backend API Server** for the HobbyHub project — a platform where users can create, join, and manage different hobby-based groups.
+
+**Tech Stack:**  
 Node.js • Express • MongoDB • Multer • Sharp • dotenv
 
-📁 Project Structure
-bash
-Copy
-Edit
+---
+
+## 📁 Project Structure
+
 📦 HobbyHub Server
-├── uploads/            # Stores uploaded images
-├── .env                # Environment variables
-├── server.js           # Main backend entry point
-├── package.json        # Project metadata & dependencies
-⚙️ Key Features
-🔐 User Management
-➕ Add new users to the database
+├── uploads/ # Stores uploaded images
+├── .env # Environment variables
+├── server.js # Main backend entry point
+├── package.json # Project metadata & dependencies
 
-👥 Group Management
-➕ Create a group (with or without image)
-
-📥 Upload and compress group image
-
-📋 Fetch all groups or filter by creator’s email
-
-🔍 View a single group by ID
-
-✏️ Update group (with or without image)
-
-❌ Delete a group
-
-📷 Image Handling
-Image uploads handled via Multer
-
-Image compression via Sharp (800px width, 70% quality)
-
-Original images are auto-deleted after compression
-
-🙋 Group Join Requests
-➕ Send join requests to a group
-
-🚫 Prevent duplicate requests or rejoining the same group
-
-📡 API Endpoints
-👥 Groups
-➕ Create Group
-bash
+pgsql
 Copy
 Edit
+
+---
+
+## ⚙️ Key Features
+
+### 🔐 User Management
+- ➕ Add new users to the database
+
+### 👥 Group Management
+- ➕ Create a group (with or without image)
+- 📥 Upload and compress group image
+- 📋 Fetch all groups or filter by creator’s email
+- 🔍 View a single group by ID
+- ✏️ Update group (with or without image)
+- ❌ Delete a group
+
+### 📷 Image Handling
+- Image uploads handled via **Multer**
+- Image compression via **Sharp** (800px width, 70% quality)
+- Original images are auto-deleted after compression
+
+### 🙋 Group Join Requests
+- ➕ Send join requests to a group
+- 🚫 Prevent duplicate requests or rejoining the same group
+
+---
+
+## 📡 API Endpoints
+
+### 👥 Groups
+
+#### ➕ Create Group
 POST /api/groups
-Body (JSON):
 
-json
+css
 Copy
 Edit
+**Body (JSON):**
+```json
 {
   "name": "Photography Club",
   "description": "For photo lovers",
@@ -154,4 +157,3 @@ If you're deploying to platforms like Render, Railway, or Vercel:
 📜 License
 This project is developed as part of the Programming Hero initiative.
 Feel free to use, modify, or improve with proper attribution.
-
