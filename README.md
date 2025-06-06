@@ -152,7 +152,7 @@ If you're deploying to platforms like Render, Railway, or Vercel:
 👤 Md Sanjid Talukdar
 📧 Email: mdsanjid@gmail.com
 📍 Based in Dhaka, Bangladesh
-🌐 GitHub: sanjidtalukder
+🌐 GitHub: https://github.com/sanjidtalukder
 
 📜 License
 This project is developed as part of the Programming Hero initiative.
