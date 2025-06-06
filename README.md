@@ -42,18 +42,6 @@ Edit
 
 ---
 
-## 🔌 API Endpoints
-
-### 👤 User
-
-#### ➕ POST `/users`
-Create a new user  
-
-```json
-{
-  "name": "John Doe",
-  "email": "john@example.com"
-}
 👥 Groups
 ➕ POST /api/groups
 Create a group with optional image field
@@ -150,3 +138,7 @@ Ensure uploads/ directory exists or handle cloud storage if needed
 
 📜 License
 This project is licensed under the Programming Hero.
+
+---
+
+
