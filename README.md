@@ -59,17 +59,6 @@ Create a new user
 Create a group with optional image field
 Body:
 
-json
-Copy
-Edit
-{
-  "name": "Photography Club",
-  "description": "For all photo lovers",
-  "creatorEmail": "john@example.com",
-  "category": "Art",
-  "startDate": "2025-06-15",
-  "image": "https://example.com/sample.jpg"
-}
 📷 POST /api/groups/:id/with-image
 Update a group with a new image
 Form Data:
@@ -77,6 +66,8 @@ Form Data:
 image (File)
 
 name, description, category, startDate (Text)
+
+
 
 🔍 GET /api/groups
 Fetch all groups or filter by creatorEmail
@@ -110,6 +101,9 @@ Edit
   "email": "jane@example.com",
   "photo": "https://example.com/jane.jpg"
 }
+
+
+
 🖼 Image Handling
 Uploads are saved under /uploads
 
