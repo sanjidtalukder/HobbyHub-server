@@ -57,9 +57,9 @@ POST /api/groups
 
 
 **Body (JSON):**
-```json
 
-{
+
+#### {
   "name": "Photography Club",
   "description": "For photo lovers",
   "creatorEmail": "john@example.com",
@@ -69,23 +69,19 @@ POST /api/groups
 }
 
 
-🖼️ Update Group With Image
+#### 🖼️ Update Group With Image
 
 
 PUT /api/groups/:id/with-image
 Form Data (multipart/form-data):
 
 
-image: File (required)
+#### image: File (required)
+
+- name, description, category, startDate: Text fields
 
 
-
-name, description, category, startDate: Text fields
-
-
-🔍 Get All Groups
-
-
+#### 🔍 Get All Groups
 
 - GET /api/groups
 
@@ -97,43 +93,36 @@ name, description, category, startDate: Text fields
 
 - size (default: 100)
 
-🔍 Get Single Group
+#### 🔍 Get Single Group
 
-GET /api/groups/:id
-✏️ Update Group Without Image
+    GET /api/groups/:id
+  ✏️ Update Group Without Image
 
-- PUT /api/groups/:id
-- Delete Group
+    - PUT /api/groups/:id
+    - Delete Group
 
- DELETE /api/groups/:id
+     DELETE /api/groups/:id
 
-🙋 Join Requests
+#### 🙋 Join Requests
 
-- Send Join Request
+    - Send Join Request
 
--- POST /api/groups/:id/join-request
- - Body (JSON):
+    -- POST /api/groups/:id/join-request
 
 
-{
-  "name": "Jane Doe",
-  "email": "jane@example.com",
-  "photo": "https://example.com/jane.jpg"
-}
+#### 🛠 Setup Instructions
 
-🛠 Setup Instructions
+    📦 Install Dependencies
 
-📦 Install Dependencies
+      - npm install
 
-- npm install
+      🧪 Create .env File
 
-🧪 Create .env File
+        PORT=5000
 
-PORT=5000
+      MONGODB_URI=your_mongodb_connection_string
 
-MONGODB_URI=your_mongodb_connection_string
-
-▶️ Run the Server
+#### ▶️ Run the Server
 
  - npm start
 
@@ -141,7 +130,7 @@ MONGODB_URI=your_mongodb_connection_string
 
 npx nodemon server.js
 
-🚀 Deployment Tips
+#### 🚀 Deployment Tips
 
 If you're deploying to platforms like Render, Railway, or Vercel:
 
@@ -151,12 +140,12 @@ If you're deploying to platforms like Render, Railway, or Vercel:
 
 🔄 Alternatively, integrate cloud image storage (like Cloudinary or S3)
 
-🙌 Author
+#### 🙌 Author
 👤 Md Sanjid Talukdar
 📧 Email: mdsanjid@gmail.com
 📍 Based in Dhaka, Bangladesh
 🌐 GitHub: https://github.com/sanjidtalukder
 
-📜 License
-This project is developed as part of the {Programming Hero} initiative.
+#### 📜 License
+This project is developed as part of the Programming Hero initiative.
 Feel free to use, modify, or improve with proper attribution.

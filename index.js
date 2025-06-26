@@ -81,6 +81,26 @@ async function run() {
       }
     });
 
+    // Get popular categories
+app.get('/api/hobbies/popular-categories', async (req, res) => {
+  try {
+    const categories = await groupsCollection
+      .aggregate([
+        { $group: { _id: "$category", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 10 }
+      ])
+      .toArray();
+
+    res.send(categories);
+  } catch (error) {
+    console.error("Error fetching popular categories:", error);
+    res.status(500).send({ error: "Failed to fetch popular categories" });
+  }
+});
+
+
+
     // Get groups with pagination
     app.get('/api/groups', async (req, res) => {
       const { creatorEmail, page = 0, size = 100 } = req.query;
